@@ -1,11 +1,15 @@
 from flask import Flask
+from tools.mysqlconnect import mysqlconnect
 
 app = Flask(__name__)
 
+cur = mysqlconnect()
 
 @app.route('/api/')
 def hello_world():  # put application's code here
-    return 'Hello World!'
+    cur.execute("select @@version")
+    output = cur.fetchone()
+    return 'Hello World!<br>MySQL version: ' + str(output[0])
 
 
 if __name__ == '__main__':
