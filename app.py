@@ -1,8 +1,9 @@
 from flask import Flask
 from tools.mysqlconnect import mysqlconnect
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
-
 cur = mysqlconnect()
 
 @app.route('/api/')

@@ -4,9 +4,9 @@ import pymysql
 
 def mysqlconnect():
     conn = pymysql.connect(
-        host=os.environ['HOST'],
-        user=os.environ['USER'],
-        password=os.environ['PASSWORD'],
+        host=os.getenv('HOST'),
+        user=os.getenv('USER'),
+        password=os.getenv('PASSWORD'),
         db='public',)
 
     cur = conn.cursor()
