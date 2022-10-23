@@ -1,16 +1,16 @@
 from flask import Flask
-from tools.mysqlconnect import mysqlconnect
+from tools.load_pandas import load_dataset
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv()
 app = Flask(__name__)
-cur = mysqlconnect()
+df = load_dataset()
 
 @app.route('/api/')
-def hello_world():  # put application's code here
-    cur.execute("select @@version")
-    output = cur.fetchone()
-    return 'Hello World!<br>MySQL version: ' + str(output[0])
+def hello_world():
+    oblasts = df.oblast.unique()
+    return 'Hello World!<br>oblasts: ' + str(oblasts)
 
 
 if __name__ == '__main__':
