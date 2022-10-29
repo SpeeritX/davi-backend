@@ -3,6 +3,7 @@ import os.path
 
 pickledData = './resources/pickled.data'
 
+
 def load_dataset():
     if not os.path.exists(pickledData):
         df = read_csv()
@@ -10,6 +11,7 @@ def load_dataset():
         return df
     df = pd.read_pickle(pickledData)
     return df
+
 
 def read_csv():
     df = []

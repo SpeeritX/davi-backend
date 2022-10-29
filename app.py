@@ -1,16 +1,19 @@
-from flask import Flask
-from tools.load_pandas import load_dataset
+from flask import Flask, request
 from dotenv import load_dotenv
-import datetime
+
+from data.flights import Flights
 
 load_dotenv()
 app = Flask(__name__)
-df = load_dataset()
+flights = Flights()
 
-@app.route('/api/')
-def hello_world():
-    oblasts = df.oblast.unique()
-    return 'Hello World!<br>oblasts: ' + str(oblasts)
+
+@app.route('/api/oblasts/', methods=['GET'])
+def oblasts():
+    args = request.args
+    print("Params...")
+    print(args)
+    return flights.oblasts
 
 
 if __name__ == '__main__':
