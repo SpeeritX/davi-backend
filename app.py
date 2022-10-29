@@ -10,11 +10,12 @@ flights = Flights()
 
 @app.route('/api/oblasts/', methods=['GET'])
 def oblasts():
-    args = request.args
-    print("Params...")
-    print(args)
     return flights.oblasts
 
+@app.route('/api/select_time/', methods=['GET'])
+def filter_by_time():
+    args = request.args
+    return flights.filter_by_time(args.get("time_1", ""), args.get("time_2", ""))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
