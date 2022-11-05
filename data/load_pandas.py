@@ -20,7 +20,6 @@ def load_minutes():
         df.to_pickle(pickled_minute)
         return df
     df = pd.read_pickle(pickled_minute)
-    df = df.set_index(['time at position'])
     return df
 
 
@@ -43,8 +42,9 @@ def read_minutes():
             "country": 'category',
             "oblast": 'category',
         },
+        index_col='time at position',
+        parse_dates=True,
         date_parser=pd.to_datetime,
-        parse_dates=['time at position'],
         usecols=[
             "ICAO 24-bit code",
             "callsign",
