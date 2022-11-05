@@ -20,6 +20,7 @@ def load_minutes():
         df.to_pickle(pickled_minute)
         return df
     df = pd.read_pickle(pickled_minute)
+    df = df.set_index(['time at position'])
     return df
 
 
@@ -59,6 +60,7 @@ def read_minutes():
 
 
 def read_days():
+    #    df = pd.read_csv(csv, index_col='date', parse_dates=True)
     df = pd.read_csv('./resources/flights_separate.csv',
         dtype={
             "flight-id": 'string[pyarrow]',
@@ -69,6 +71,8 @@ def read_days():
             "velocity": 'float32',
             "vertical rate": 'float32',
         },
+        index_col='date',
+        parse_dates=True,
         date_parser=pd.to_datetime,
         usecols=[
             "date",
