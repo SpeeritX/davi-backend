@@ -1,21 +1,30 @@
 import pandas as pd
 import os.path
 
-pickledData = './resources/pickled.data'
+pickled_minute = './resources/pickled_minute.data'
+pickled_day = './resources/pickled_day.data'
 
 
-def load_dataset():
-    if not os.path.exists(pickledData):
-        df = read_csv()
-        df.to_pickle(pickledData)
+def load_days():
+    if not os.path.exists(pickled_day):
+        df = read_days()
+        df.to_pickle(pickled_day)
         return df
-    df = pd.read_pickle(pickledData)
+    df = pd.read_pickle(pickled_day)
     return df
 
 
-def read_csv():
-    df = []
-    with pd.read_csv('./resources/processed_data_davi.csv', 
+def load_minutes():
+    if not os.path.exists(pickled_minute):
+        df = read_minutes()
+        df.to_pickle(pickled_minute)
+        return df
+    df = pd.read_pickle(pickled_minute)
+    return df
+
+
+def read_minutes():
+    df = pd.read_csv('./resources/processed_data_davi.csv',
         dtype={
             "ICAO 24-bit code": 'string[pyarrow]',
             "callsign": 'string[pyarrow]',
@@ -32,8 +41,8 @@ def read_csv():
             "squawk": 'float32',
             "country": 'category',
             "oblast": 'category',
-        }, 
-        date_parser = pd.to_datetime,
+        },
+        date_parser=pd.to_datetime,
         parse_dates=['time at position'],
         usecols=[
             "ICAO 24-bit code",
@@ -43,10 +52,32 @@ def read_csv():
             "longitude",
             "latitude",
             "country",
+            "oblast",
+            "flight-id"
+        ])
+    return df
+
+
+def read_days():
+    df = pd.read_csv('./resources/flights_separate.csv',
+        dtype={
+            "flight-id": 'string[pyarrow]',
+            "origin country": 'category',
+            "date": 'string[pyarrow]',
+            "latitude, longitude": 'string[pyarrow]',
+            "barometric altitude": 'float32',
+            "velocity": 'float32',
+            "vertical rate": 'float32',
+        },
+        date_parser=pd.to_datetime,
+        usecols=[
+            "date",
+            "origin country",
+            "barometric altitude",
+            "velocity",
+            "vertical rate",
+            "latitude, longitude",
+            "country",
             "oblast"
-        ],
-        chunksize=1_000_000) as reader:
-        for chunk in reader:
-            df.append(chunk)
-    df = pd.concat(df)
+        ])
     return df

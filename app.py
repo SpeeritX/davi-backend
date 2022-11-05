@@ -7,7 +7,6 @@ load_dotenv()
 app = Flask(__name__)
 flights = Flights()
 
-
 @app.route('/api/oblasts/', methods=['GET'])
 def oblasts():
     return flights.oblasts
