@@ -11,6 +11,7 @@ def load_days():
         df.to_pickle(pickled_day)
         return df
     df = pd.read_pickle(pickled_day)
+    df = df.rename(columns={"barometric altitude": "barometric_altitude", "origin country": "origin_country" })
     return df
 
 
