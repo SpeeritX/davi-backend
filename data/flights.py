@@ -1,4 +1,4 @@
-from data.load_pandas import load_minutes, load_days
+from data.load_pandas import load_minutes, load_days, load_parallel
 from datetime import datetime
 import pandas as pd
 from datetime import timedelta
@@ -9,6 +9,7 @@ class Flights:
     def __init__(self):
         self.df_minutes = load_minutes()
         self.df_days = load_days()
+        self.df_parallel = load_parallel()
         print("Dataset is ready...")
 
     @property
@@ -39,6 +40,13 @@ class Flights:
             query.append('origin_country.isin(\"'+filter['origin country']+'\".split(\',\'))')
         query = ' & '.join(query)
         return selected_dates.query(query)
+
+    def parallel(self, filter):
+        if 'date_1' in filter and 'date_2' in filter:
+            selected_dates = self.df_parallel.loc[filter['date_1']:filter['date_2']]
+            return selected_dates
+        else:
+            return self.df_parallel
 
     def filter_by_date_return_country_count_too(self, date_1, date_2):
         return {self.df_days[date_1:date_2],self.df_days[date_1:date_2]['origin country'].value_counts()}

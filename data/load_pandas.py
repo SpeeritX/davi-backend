@@ -3,6 +3,7 @@ import os.path
 
 pickled_minute = './resources/pickled_minute.data'
 pickled_day = './resources/pickled_day.data'
+pickled_parallel = './resources/pickled_parallel.data'
 
 
 def load_days():
@@ -21,6 +22,14 @@ def load_minutes():
         df.to_pickle(pickled_minute)
         return df
     df = pd.read_pickle(pickled_minute)
+    return df
+
+def load_parallel():
+    if not os.path.exists(pickled_parallel):
+        df = read_parallel_sets()
+        df.to_pickle(pickled_parallel)
+        return df
+    df = pd.read_pickle(pickled_parallel)
     return df
 
 
@@ -57,6 +66,18 @@ def read_minutes():
             "oblast",
             "flight-id"
         ])
+    return df
+
+def read_parallel_sets():
+    df = pd.read_csv('./resources/parallel_sets_try.csv',
+                     dtype={
+                         "origin country": 'category',
+                         "was_in_ukraine": 'bool',
+                         "altitude_group": 'string[pyarrow]',
+                     },
+                     index_col='date',
+                     parse_dates=True,
+                     date_parser=pd.to_datetime)
     return df
 
 

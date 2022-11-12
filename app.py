@@ -1,5 +1,6 @@
 from flask import Flask, request, Response
 from dotenv import load_dotenv
+import json
 
 from data.flights import Flights
 
@@ -19,6 +20,12 @@ def filter_by_flight_id(id):
 def filter_flights():
     args = request.args
     return flights.filter(args).to_json(orient='records')
+
+@app.route('/api/parallel/', methods=['GET'])
+def parallel_flights():
+    args = request.args
+    return flights.parallel(args).to_json( orient='split', index=False)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
