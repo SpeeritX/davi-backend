@@ -72,11 +72,11 @@ def read_minutes():
 
 
 def read_parallel_sets():
-    df = pd.read_csv('./resources/parallel_sets_try.csv',
+    df = pd.read_csv('./resources/parallel_sets_numbers.csv',
                      dtype={
-                         "origin country": 'category',
-                         "was_in_ukraine": 'bool',
-                         "altitude_group": 'string[pyarrow]',
+                         "spi": 'int16',
+                         "squawk": 'string[pyarrow]',
+                         "was_in_ukraine": 'int16'
                      },
                      index_col='date',
                      parse_dates=True,
