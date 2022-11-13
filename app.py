@@ -28,7 +28,13 @@ def filter_flights():
 @app.route('/api/regions/', methods=['GET'])
 def regions():
     args = request.args
-    return flights.region_counted(args).to_json(orient='split', index=False)
+    return json.dumps(flights.region_counted(args))
+
+
+@app.route('/api/matrix/', methods=['GET'])
+def matrix():
+    args = request.args
+    return json.dumps(flights.region_to_region(args))
 
 
 @app.route('/api/parallel/', methods=['GET'])

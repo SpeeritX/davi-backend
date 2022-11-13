@@ -26,15 +26,6 @@ def load_minutes():
     return df
 
 
-def load_parallel():
-    if not os.path.exists(pickled_parallel):
-        df = read_parallel_sets()
-        df.to_pickle(pickled_parallel)
-        return df
-    df = pd.read_pickle(pickled_parallel)
-    return df
-
-
 def read_minutes():
     df = pd.read_csv('./resources/processed_data_davi.csv',
                      dtype={
@@ -71,19 +62,6 @@ def read_minutes():
     return df
 
 
-def read_parallel_sets():
-    df = pd.read_csv('./resources/parallel_sets_numbers.csv',
-                     dtype={
-                         "spi": 'int16',
-                         "squawk": 'string[pyarrow]',
-                         "was_in_ukraine": 'int16'
-                     },
-                     index_col='date',
-                     parse_dates=True,
-                     date_parser=pd.to_datetime)
-    return df
-
-
 def read_days():
     #    df = pd.read_csv(csv, index_col='date', parse_dates=True)
     df = pd.read_csv('./resources/flights_separate.csv',
@@ -91,24 +69,14 @@ def read_days():
                          "flight-id": 'string[pyarrow]',
                          "origin country": 'category',
                          "date": 'string[pyarrow]',
-                         "latitude, longitude": 'string[pyarrow]',
                          "barometric altitude": 'float32',
                          "velocity": 'float32',
                          "vertical rate": 'float32',
-                         "was_in_ukraine": 'bool'
+                         "spi": 'int16',
+                         "squawk": 'string[pyarrow]',
+                         "was_in_ukraine": 'int16'
                      },
                      index_col='date',
                      parse_dates=True,
-                     date_parser=pd.to_datetime,
-                     usecols=[
-                         "date",
-                         "origin country",
-                         "barometric altitude",
-                         "velocity",
-                         "vertical rate",
-                         "latitude, longitude",
-                         "country",
-                         "oblast",
-                         "was_in_ukraine"
-                     ])
+                     date_parser=pd.to_datetime)
     return df
