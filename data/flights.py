@@ -22,7 +22,8 @@ class Flights:
     def filter(self, filter):
         selected_dates = self.df_days
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
+            selected_dates = self.df_days.loc[filter['date_1']
+                :filter['date_2']]
         query = []
         if 'velocity' in filter:
             query.append('velocity >= ' + str(float(filter['velocity'])))
@@ -51,8 +52,11 @@ class Flights:
         counted = {}
 
         def add_regions(x):
-            set_regions = x.strip("{}").split(",")
+            set_regions = x.strip("{}").split(", ")
             for reg in set_regions:
+                reg = reg.strip("\'")
+                if reg == 'nan':
+                    continue
                 if reg in counted:
                     counted[reg] = counted[reg] + 1
                 else:
@@ -70,8 +74,9 @@ class Flights:
 
     def parallel(self, filter):
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
-            return selected_dates
+            selected_dates = self.df_days.loc[filter['date_1']
+                :filter['date_2']]
+            return selected_dates[['squawk', 'was_in_ukraine', 'spi']]
         else:
             return self.df_days[['squawk', 'was_in_ukraine', 'spi']]
 
