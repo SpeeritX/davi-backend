@@ -4,4 +4,4 @@
 .env
 .DS_Store
 /resources/
-/preprocessing/processed_data_davi.csv
+/preprocessing/*.csv

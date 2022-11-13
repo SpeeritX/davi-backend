@@ -17,36 +17,54 @@ class Flights:
         return list(self.df_minutes.oblast.unique())
 
     def filter_flight_by_id(self, flight_id):
-        #return flight_id
+        # return flight_id
         return self.df_minutes[self.df_minutes['flight-id'] == flight_id]
 
     def filter(self, filter):
         if filter['date_1'] != '' and filter['date_2'] != '':
-            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
+            selected_dates = self.df_days.loc[filter['date_1']
+                :filter['date_2']]
         if len(filter) == 2:
             return selected_dates
         query = []
         if 'velocity' in filter:
             query.append('velocity >= ' + str(float(filter['velocity'])))
         if 'maxalt' in filter:
-            query.append('barometric_altitude >= ' + str(float(filter['maxalt'])))
+            query.append('barometric_altitude >= ' +
+                         str(float(filter['maxalt'])))
         if 'spi' in filter:
             query.append('spi == ' + filter['spi'])
         if 'squawk' in filter:
-            query.append( 'squawk == ' + filter['squawk'])
+            query.append('squawk == ' + filter['squawk'])
         if 'current country' in filter:
-            query.append('country.str.contains(\'|\'.join(\"'+filter['current country']+'\".split(\',\')))')
+            query.append('country.str.contains(\'|\'.join(\"' +
+                         filter['current country']+'\".split(\',\')))')
         if 'origin country' in filter:
-            query.append('origin_country.isin(\"'+filter['origin country']+'\".split(\',\'))')
+            query.append('origin_country.isin(\"' +
+                         filter['origin country']+'\".split(\',\'))')
         query = ' & '.join(query)
         return selected_dates.query(query)
 
+    def region_counted(self, filter):
+        counted = {}
+
+        def add_regions(set_regions):
+            for reg in set_regions:
+                if reg in counted:
+                    counted[reg] = counted[reg] + 1
+                else:
+                    counted[reg] = 1
+        m_df = self.filter(filter)
+        m_df.oblast.apply(add_regions)
+        return
+
     def parallel(self, filter):
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_parallel.loc[filter['date_1']:filter['date_2']]
+            selected_dates = self.df_parallel.loc[filter['date_1']
+                :filter['date_2']]
             return selected_dates
         else:
             return self.df_parallel
 
     def filter_by_date_return_country_count_too(self, date_1, date_2):
-        return {self.df_days[date_1:date_2],self.df_days[date_1:date_2]['origin country'].value_counts()}
+        return {self.df_days[date_1:date_2], self.df_days[date_1:date_2]['origin country'].value_counts()}
