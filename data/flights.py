@@ -3,12 +3,24 @@ from datetime import datetime
 import pandas as pd
 from datetime import timedelta
 import numpy as np
+from datetime import datetime
 
 
 class Flights:
     def __init__(self):
         self.df_minutes = load_minutes()
         self.df_days = load_days()
+
+        def clean_regions(x):
+            set_regions = x.strip("{}").split(", ")
+            clean = []
+            for reg in set_regions:
+                reg = reg.strip("\'")
+                if reg == 'nan':
+                    continue
+                clean.append(reg)
+            return clean
+        self.df_days['state'] = self.df_days.oblast.apply(clean_regions)
         print("Dataset is ready...")
 
     @property
@@ -22,8 +34,7 @@ class Flights:
     def filter(self, filter):
         selected_dates = self.df_days
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']
-                :filter['date_2']]
+            selected_dates = self.df_days.loc[filter['date_1']                                              :filter['date_2']]
         query = []
         if 'velocity' in filter:
             query.append('velocity >= ' + str(float(filter['velocity'])))
@@ -52,30 +63,41 @@ class Flights:
         counted = {}
 
         def add_regions(x):
-            set_regions = x.strip("{}").split(", ")
-            for reg in set_regions:
-                reg = reg.strip("\'")
-                if reg == 'nan':
-                    continue
+            for reg in x:
                 if reg in counted:
                     counted[reg] = counted[reg] + 1
                 else:
                     counted[reg] = 1
-        self.filter(filter).oblast.apply(add_regions)
+        self.filter(filter).state.apply(add_regions)
         return counted
 
-    def region_to_region(self, filter):
+    def matrix_absolute(self, filter):
         mod_filter = filter.copy()
-        counted = self.region_counted(filter)
+        counted = self.region_counted({})
         for reg in counted:
             mod_filter['current_region'] = reg
             counted[reg] = self.region_counted(mod_filter)
         return counted
 
+    def matrix_expected(self, filter):
+        absolute = self.matrix_absolute(filter)
+        mod_filter = filter.copy()
+        if 'date_1' in filter and 'date_2' in filter:
+            del mod_filter['date_1']
+            del mod_filter['date_2']
+        all_time = self.matrix_absolute(mod_filter)
+        for reg1, val in all_time.items():
+            for reg2, count in val.items():
+                if reg1 not in absolute or reg2 not in all_time[reg1]:
+                    all_time[reg1][reg2] = -all_time[reg1][reg2] / 117
+                else:
+                    all_time[reg1][reg2] = -all_time[reg1][reg2] / 117 + count / ((datetime.fromisoformat(
+                        filter['date_2']) - datetime.fromisoformat(filter['date_1'])).days + 1)
+        return all_time
+
     def parallel(self, filter):
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']
-                :filter['date_2']]
+            selected_dates = self.df_days.loc[filter['date_1']                                              :filter['date_2']]
             return selected_dates[['squawk', 'was_in_ukraine', 'spi']]
         else:
             return self.df_days[['squawk', 'was_in_ukraine', 'spi']]

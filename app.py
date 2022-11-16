@@ -31,10 +31,16 @@ def regions():
     return json.dumps(flights.region_counted(args))
 
 
-@app.route('/api/matrix/', methods=['GET'])
-def matrix():
+@app.route('/api/matrix/absolute/', methods=['GET'])
+def matrix_absolute():
     args = request.args
-    return json.dumps(flights.region_to_region(args))
+    return json.dumps(flights.matrix_absolute(args))
+
+
+@app.route('/api/matrix/expected/', methods=['GET'])
+def matrix_expected():
+    args = request.args
+    return json.dumps(flights.matrix_expected(args))
 
 
 @app.route('/api/parallel/', methods=['GET'])
