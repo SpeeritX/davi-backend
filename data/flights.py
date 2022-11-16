@@ -41,6 +41,27 @@ class Flights:
         query = ' & '.join(query)
         return selected_dates.query(query)
 
+    def count(self, filter):
+        if filter['date_1'] != '' and filter['date_2'] != '':
+            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
+        if len(filter) == 2:
+            return selected_dates.groupby(level='date')["latitude, longitude"].count()
+        query = []
+        if 'velocity' in filter:
+            query.append('velocity >= ' + str(float(filter['velocity'])))
+        if 'maxalt' in filter:
+            query.append('barometric_altitude >= ' + str(float(filter['maxalt'])))
+        if 'spi' in filter:
+            query.append('spi == ' + filter['spi'])
+        if 'squawk' in filter:
+            query.append( 'squawk == ' + filter['squawk'])
+        if 'current country' in filter:
+            query.append('country.str.contains(\'|\'.join(\"'+filter['current country']+'\".split(\',\')))')
+        if 'origin country' in filter:
+            query.append('origin_country.isin(\"'+filter['origin country']+'\".split(\',\'))')
+        query = ' & '.join(query)
+        return selected_dates.query(query).groupby(level='date')['latitude, longitude'].count()
+
     def parallel(self, filter):
         if 'date_1' in filter and 'date_2' in filter:
             selected_dates = self.df_parallel.loc[filter['date_1']:filter['date_2']]

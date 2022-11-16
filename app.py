@@ -21,6 +21,11 @@ def filter_flights():
     args = request.args
     return flights.filter(args).to_json(orient='records')
 
+@app.route('/api/flights_count/', methods=['GET'])
+def count_flights():
+    args = request.args
+    return flights.count(args).to_json(orient='records')
+
 @app.route('/api/parallel/', methods=['GET'])
 def parallel_flights():
     args = request.args
