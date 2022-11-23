@@ -96,11 +96,15 @@ class Flights:
         return all_time
 
     def count(self, filter):
-        return self.filter(filter).groupby(level='date')['latitude, longitude'].count()
+        dates = pd.date_range(start=filter['date_1'],end=filter['date_2'])
+        dates = pd.DataFrame(index=dates, columns=['count'])
+        filter = self.filter(filter).groupby(level='date')['latitude, longitude'].count()
+        return dates.join(filter).drop(columns=['count']).fillna(0)
+
 
     def parallel(self, filter):
         if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']                                              :filter['date_2']]
+            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
             return selected_dates[['squawk', 'was_in_ukraine', 'spi']]
         else:
             return self.df_days[['squawk', 'was_in_ukraine', 'spi']]
