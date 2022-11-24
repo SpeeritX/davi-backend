@@ -33,25 +33,28 @@ class Flights:
 
     def filter(self, filter):
         selected_dates = self.df_days
-        if 'date_1' in filter and 'date_2' in filter:
+        if filter.get('date_1') and filter.get('date_2'):
             selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
         query = []
-        if 'velocity' in filter:
-            query.append('velocity >= ' + str(float(filter['velocity'])))
-        if 'maxalt' in filter:
-            query.append('barometric_altitude >= ' +
-                         str(float(filter['maxalt'])))
-        if 'spi' in filter:
+        if filter.get('velocity_min'):
+            query.append('velocity >= ' + str(float(filter['velocity_min'])))
+        if filter.get('velocity_max'):
+            query.append('velocity <= ' + str(float(filter['velocity_max'])))
+        if filter.get('altitude_min'):
+            query.append('barometric_altitude >= ' + str(float(filter['altitude_min'])))
+        if filter.get('altitude_max'):
+            query.append('barometric_altitude <= ' + str(float(filter['altitude_max'])))
+        if filter.get('spi'):
             query.append('spi == ' + filter['spi'])
-        if 'squawk' in filter:
+        if filter.get('squawk'):
             query.append('squawk == ' + filter['squawk'])
-        if 'current_country' in filter:
+        if filter.get('current_country'):
             query.append('country.str.contains(\'|\'.join(\"' +
                          filter['current_country']+'\".split(\',\')))')
-        if 'current_region' in filter:
+        if filter.get('current_region'):
             query.append('oblast.str.contains(\'|\'.join(\"' +
                          filter['current_region']+'\".split(\',\')))')
-        if 'origin_country' in filter:
+        if filter.get('origin_country'):
             query.append('origin_country.isin(\"' +
                          filter['origin_country']+'\".split(\',\'))')
         query = ' & '.join(query)

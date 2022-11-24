@@ -46,7 +46,7 @@ def matrix_expected():
 @app.route('/api/flights_count/', methods=['GET'])
 def count_flights():
     args = request.args
-    return flights.count(args).to_json(orient='split', index=True)
+    return flights.count(args).to_json(orient='split', index=False)
 
 
 @app.route('/api/parallel/', methods=['GET'])
