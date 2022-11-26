@@ -1,8 +1,5 @@
 from data.load_pandas import load_minutes, load_days
-from datetime import datetime
 import pandas as pd
-from datetime import timedelta
-import numpy as np
 from datetime import datetime
 
 
@@ -105,13 +102,8 @@ class Flights:
         filter = self.filter(filter).groupby(level='date')['latitude, longitude'].count()
         return dates.join(filter).drop(columns=['count']).fillna(0)
 
-
     def parallel(self, filter):
-        if 'date_1' in filter and 'date_2' in filter:
-            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
-            return selected_dates[['squawk', 'was_in_ukraine', 'spi']]
-        else:
-            return self.df_days[['squawk', 'was_in_ukraine', 'spi']]
+        return self.filter(filter)[['squawk', 'was_in_ukraine', 'spi']]
 
     def filter_by_date_return_country_count_too(self, date_1, date_2):
         return {self.df_days[date_1:date_2], self.df_days[date_1:date_2]['origin country'].value_counts()}
