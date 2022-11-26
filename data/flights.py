@@ -18,6 +18,9 @@ class Flights:
                 clean.append(reg)
             return clean
         self.df_days['state'] = self.df_days.oblast.apply(clean_regions)
+        self.df_days['state2'] = self.df_days['state']
+        self.df_region_exploded = self.df_days.explode('state')
+        self.df_days.drop("state2", axis=1)
         print("Dataset is ready...")
 
     @property
@@ -28,23 +31,28 @@ class Flights:
         # return flight_id
         return self.df_minutes[self.df_minutes['flight-id'] == flight_id]
 
-    def filter(self, filter):
-        selected_dates = self.df_days
+    def filter(self, filter, df=None):
+        if df is None:
+            df = self.df_days
+        selected_dates = df
         if filter.get('date_1') and filter.get('date_2'):
-            selected_dates = self.df_days.loc[filter['date_1']:filter['date_2']]
+            selected_dates = df.loc[filter['date_1']:filter['date_2']]
         query = []
         if filter.get('velocity_min'):
             query.append('velocity >= ' + str(float(filter['velocity_min'])))
         if filter.get('velocity_max'):
             query.append('velocity <= ' + str(float(filter['velocity_max'])))
         if filter.get('altitude_min'):
-            query.append('barometric_altitude >= ' + str(float(filter['altitude_min'])))
+            query.append('barometric_altitude >= ' +
+                         str(float(filter['altitude_min'])))
         if filter.get('altitude_max'):
-            query.append('barometric_altitude <= ' + str(float(filter['altitude_max'])))
+            query.append('barometric_altitude <= ' +
+                         str(float(filter['altitude_max'])))
         if filter.get('spi'):
             query.append('spi == ' + filter['spi'])
         if filter.get('squawk'):
-            selected_dates = selected_dates[selected_dates.squawk == str(filter['squawk'])]
+            selected_dates = selected_dates[selected_dates.squawk == str(
+                filter['squawk'])]
         if filter.get('current_country'):
             query.append('country.str.contains(\'|\'.join(\"' +
                          filter['current_country']+'\".split(\',\')))')
@@ -57,28 +65,16 @@ class Flights:
         query = ' & '.join(query)
         if query == '':
             return selected_dates
-        #return query
+        # return query
         return selected_dates.query(query)
 
     def region_counted(self, filter):
-        counted = {}
-
-        def add_regions(x):
-            for reg in x:
-                if reg in counted:
-                    counted[reg] = counted[reg] + 1
-                else:
-                    counted[reg] = 1
-        self.filter(filter).state.apply(add_regions)
-        return counted
+        return self.filter(filter, self.df_region_exploded)['state'].value_counts()
 
     def matrix_absolute(self, filter):
-        mod_filter = filter.copy()
-        counted = self.region_counted({})
-        for reg in counted:
-            mod_filter['current_region'] = reg
-            counted[reg] = self.region_counted(mod_filter)
-        return counted
+        return self.filter(filter, self.df_region_exploded)[['state', 'state2']].explode(
+            'state2').groupby(['state', 'state2']).size().to_frame(
+                'v')
 
     def matrix_expected(self, filter):
         absolute = self.matrix_absolute(filter)
@@ -87,19 +83,18 @@ class Flights:
             del mod_filter['date_1']
             del mod_filter['date_2']
         all_time = self.matrix_absolute(mod_filter)
-        for reg1, val in all_time.items():
-            for reg2, count in val.items():
-                if reg1 not in absolute or reg2 not in all_time[reg1]:
-                    all_time[reg1][reg2] = -all_time[reg1][reg2] / 117
-                else:
-                    all_time[reg1][reg2] = -all_time[reg1][reg2] / 117 + count / ((datetime.fromisoformat(
-                        filter['date_2']) - datetime.fromisoformat(filter['date_1'])).days + 1)
+        days = (datetime.fromisoformat(
+            filter['date_2']) - datetime.fromisoformat(filter['date_1'])).days + 1
+        vals_per_day = absolute['v'] / days
+        vals_per_day[vals_per_day.isna()] = 0
+        all_time['v'] = (- all_time['v'] / 117) + vals_per_day
         return all_time
 
     def count(self, filter):
-        dates = pd.date_range(start=filter['date_1'],end=filter['date_2'])
+        dates = pd.date_range(start=filter['date_1'], end=filter['date_2'])
         dates = pd.DataFrame(index=dates, columns=['count'])
-        filter = self.filter(filter).groupby(level='date')['latitude, longitude'].count()
+        filter = self.filter(filter).groupby(level='date')[
+            'latitude, longitude'].count()
         return dates.join(filter).drop(columns=['count']).fillna(0)
 
     def parallel(self, filter):

@@ -28,19 +28,21 @@ def filter_flights():
 @app.route('/api/regions/', methods=['GET'])
 def regions():
     args = request.args
-    return json.dumps(flights.region_counted(args))
+    return flights.region_counted(args).to_json()
 
 
 @app.route('/api/matrix/absolute/', methods=['GET'])
 def matrix_absolute():
     args = request.args
-    return json.dumps(flights.matrix_absolute(args))
+    return flights.matrix_absolute(args).reset_index().rename(
+        columns={'state': 'x', 'state2': 'y'}).to_json(orient='table', index=False)
 
 
 @app.route('/api/matrix/expected/', methods=['GET'])
 def matrix_expected():
     args = request.args
-    return json.dumps(flights.matrix_expected(args))
+    return flights.matrix_expected(args).reset_index().rename(
+        columns={'state': 'x', 'state2': 'y'}).to_json(orient='table', index=False)
 
 
 @app.route('/api/flights_count/', methods=['GET'])
