@@ -47,7 +47,7 @@ class Flights:
         if filter.get('spi'):
             query.append('spi == ' + filter['spi'])
         if filter.get('squawk'):
-            query.append('squawk == ' + filter['squawk'])
+            selected_dates = selected_dates[selected_dates.squawk == str(filter['squawk'])]
         if filter.get('current_country'):
             query.append('country.str.contains(\'|\'.join(\"' +
                          filter['current_country']+'\".split(\',\')))')
@@ -60,6 +60,7 @@ class Flights:
         query = ' & '.join(query)
         if query == '':
             return selected_dates
+        #return query
         return selected_dates.query(query)
 
     def region_counted(self, filter):
