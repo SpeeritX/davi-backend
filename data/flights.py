@@ -51,6 +51,8 @@ class Flights:
                          str(float(filter['altitude_max'])))
         if filter.get('spi'):
             query.append('spi == ' + filter['spi'])
+        if filter.get('was_in_ukraine'):
+            query.append('was_in_ukraine == ' + filter['was_in_ukraine'])
         if filter.get('squawk'):
             selected_dates = selected_dates[selected_dates.squawk == str(
                 filter['squawk'])]
