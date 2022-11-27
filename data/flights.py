@@ -21,6 +21,7 @@ class Flights:
         self.df_days['state2'] = self.df_days['state']
         self.df_region_exploded = self.df_days.explode('state')
         self.df_days.drop("state2", axis=1)
+        self.day_count = len(self.df_days.index.unique())
         print("Dataset is ready...")
 
     @property
@@ -57,8 +58,12 @@ class Flights:
             query.append('country.str.contains(\'|\'.join(\"' +
                          filter['current_country']+'\".split(\',\')))')
         if filter.get('current_region'):
-            query.append('oblast.str.contains(\'|\'.join(\"' +
-                         filter['current_region']+'\".split(\',\')))')
+            [reg1, reg2] = filter['current_region'].split(',')
+            if reg1 == reg2:
+                query.append('oblast.str.contains(\"'+reg1+'\")')
+            else:
+                query.append('oblast.str.contains(\"'+reg1 +
+                             '.*'+reg2+'|'+reg2+'.*'+reg1+'\")')
         if filter.get('origin_country'):
             query.append('origin_country.isin(\"' +
                          filter['origin_country']+'\".split(\',\'))')
@@ -83,12 +88,14 @@ class Flights:
             del mod_filter['date_1']
             del mod_filter['date_2']
         all_time = self.matrix_absolute(mod_filter)
+        returned = all_time.copy()
         days = (datetime.fromisoformat(
             filter['date_2']) - datetime.fromisoformat(filter['date_1'])).days + 1
-        vals_per_day = absolute['v'] / days
-        vals_per_day[vals_per_day.isna()] = 0
-        all_time['v'] = (- all_time['v'] / 117) + vals_per_day
-        return all_time
+        returned['v'] = (- all_time['v'] / self.day_count) + \
+            absolute['v'] / days
+        returned['v'][returned['v'].isna()] = (- all_time['v'] /
+                                               self.day_count)
+        return returned
 
     def count(self, filter):
         dates = pd.date_range(start=filter['date_1'], end=filter['date_2'])
