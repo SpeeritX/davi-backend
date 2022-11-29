@@ -95,6 +95,7 @@ class Flights:
             absolute['v'] / days
         returned['v'][returned['v'].isna()] = (- all_time['v'] /
                                                self.day_count)
+        returned['n'] = absolute['v']
         return returned
 
     def count(self, filter):
