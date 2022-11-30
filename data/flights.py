@@ -93,11 +93,10 @@ class Flights:
         returned = all_time.copy()
         days = (datetime.fromisoformat(
             filter['date_2']) - datetime.fromisoformat(filter['date_1'])).days + 1
-        returned['v'] = (- all_time['v'] / self.day_count) + \
-            absolute['v'] / days
-        returned['v'][returned['v'].isna()] = (- all_time['v'] /
-                                               self.day_count)
-        returned['n'] = absolute['v']
+        returned['expected'] = all_time['v'] / self.day_count
+        returned['absolute'] = 0
+        returned['absolute'][absolute.index] = absolute['v'] / days
+        returned['v'] = returned['absolute'] - returned['expected']
         return returned
 
     def count(self, filter):
