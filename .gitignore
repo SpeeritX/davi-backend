@@ -3,5 +3,5 @@
 */__pycache__/
 .env
 .DS_Store
-/resources/
+/resources/*.data
 /preprocessing/*.csv
